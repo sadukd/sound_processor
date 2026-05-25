@@ -20,7 +20,7 @@ Result ArgsParser::parse(int argc, char* argv[])
     Option curOption = Option::none;
     FilterDescriptor* currentFilter = nullptr;
 
-    for (int i = 0; i < argc; i++)
+    for (int i = 1; i < argc; i++)
     {
         std::string cur = argv[i];
 
@@ -39,39 +39,39 @@ Result ArgsParser::parse(int argc, char* argv[])
         if (cur == "-f")
         {
             curOption = Option::filter;
-            _filterDescriptors.push_back({})ж
-            currentFilter = &_filterDescriptors.back()
+            _filterDescriptors.push_back({});
+            currentFilter = &_filterDescriptors.back();
             continue;
         }
 
         switch (curOption)
         {
-        case State::input:
+        case Option::input:
             if (!_inFileName.empty())
                 return Result::badArgs;
 
             _inFileName = cur;
-            curOption = State::None;
+            curOption = Option::none;
             break;
-        case State::Output:
+        case Option::output:
             if (!_outFileName.empty())
                 return Result::badArgs;
 
             _outFileName = cur;
-            curOption = State::None;
+            curOption = Option::none;
             break;
-        case State::Filter:
+        case Option::filter:
             if (!currentFilter)
                 return Result::badArgs;
 
-            if (currentFilter->name.empty())
-                currentFilter->name = cur;
+            if (currentFilter->filterName.empty())
+                currentFilter->filterName = cur;
             else
                 currentFilter->params.push_back(cur);
 
             break;
 
-        case State::None:
+        case Option::none:
             return Result::badArgs;
         }
     }

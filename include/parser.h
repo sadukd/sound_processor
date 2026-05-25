@@ -19,7 +19,7 @@ public:
 public:
     const std::string& getInFileName() const { return _inFileName; }
     const std::string& getOutFileName() const { return _outFileName; }
-    const std::vector<FilterDescriptor>& getFilters() const { return _filters; }
+    const std::vector<FilterDescriptor>& getFilters() const { return _filterDescriptors; }
 
 private:
     std::string _inFileName;
