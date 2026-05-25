@@ -104,7 +104,7 @@ TEST_CASE("mix input output filter full scenario")
         cstr("-f"), cstr("sharpen"), cstr("2")
     };
 
-    REQUIRE(p.parse(10, argv) == Result::ok);
+    REQUIRE(p.parse(12, argv) == Result::ok);
 
     REQUIRE(p.getInFileName() == "in.txt");
     REQUIRE(p.getOutFileName() == "out.txt");
