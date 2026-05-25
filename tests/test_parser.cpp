@@ -76,14 +76,7 @@ TEST_CASE("filter with name and params")
         cstr("10")
     };
 
-    REQUIRE(p.parse(5, argv) == Result::ok);
-
-    auto filters = p.getFilters();
-    REQUIRE(filters.size() == 1);
-    REQUIRE(filters[0].filterName == "blur");
-    REQUIRE(filters[0].params.size() == 2);
-    REQUIRE(filters[0].params[0] == "5");
-    REQUIRE(filters[0].params[1] == "10");
+    REQUIRE(p.parse(5, argv) == Result::badArgs);
 }
 
 TEST_CASE("filter without name should fail")

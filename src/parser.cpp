@@ -1,80 +1,92 @@
 #include "parser.h"
-#include <set>
 #include <string>
-#include <cstdint>
+#include <vector>
 
-enum class Option {
+enum class Mode
+{
     none,
     input,
     output,
-    filter
+    filterName,
+    filterArgs
 };
 
 Result ArgsParser::parse(int argc, char* argv[])
 {
-    if (argc == 1)
-    {
+    if(argc <= 1)
         return Result::badArgs;
-    }
 
-    Option curOption = Option::none;
+    Mode mode = Mode::none;
     FilterDescriptor* currentFilter = nullptr;
 
-    for (int i = 1; i < argc; i++)
+    for(int i = 1; i < argc; i++)
     {
         std::string cur = argv[i];
 
-        if (cur == "-i")
+        if(cur == "-i")
         {
-            curOption = Option::input;
+            if(!_inFileName.empty())
+                return Result::badArgs;
+
+            mode = Mode::input;
             continue;
         }
 
-        if (cur == "-o")
+        if(cur == "-o")
         {
-            curOption = Option::output;
+            if(!_outFileName.empty())
+                return Result::badArgs;
+
+            mode = Mode::output;
             continue;
         }
 
-        if (cur == "-f")
+        if(cur == "-f")
         {
-            curOption = Option::filter;
-            _filterDescriptors.push_back({});
+            _filterDescriptors.push_back(FilterDescriptor{});
             currentFilter = &_filterDescriptors.back();
+
+            mode = Mode::filterName;
             continue;
         }
 
-        switch (curOption)
+        if(cur[0] == '-')
+            return Result::badArgs;
+
+        switch(mode)
         {
-        case Option::input:
-            if (!_inFileName.empty())
-                return Result::badArgs;
-
+        case Mode::input:
             _inFileName = cur;
-            curOption = Option::none;
+            mode = Mode::none;
             break;
-        case Option::output:
-            if (!_outFileName.empty())
-                return Result::badArgs;
 
+        case Mode::output:
             _outFileName = cur;
-            curOption = Option::none;
+            mode = Mode::none;
             break;
-        case Option::filter:
-            if (!currentFilter)
+
+        case Mode::filterName:
+            if(!currentFilter)
                 return Result::badArgs;
 
-            if (currentFilter->filterName.empty())
-                currentFilter->filterName = cur;
-            else
-                currentFilter->params.push_back(cur);
-
+            currentFilter->filterName = cur;
+            mode = Mode::filterArgs;
             break;
 
-        case Option::none:
+        case Mode::filterArgs:
+            if(!currentFilter)
+                return Result::badArgs;
+
+            currentFilter->params.push_back(cur);
+            break;
+
+        case Mode::none:
             return Result::badArgs;
         }
     }
+
+    if(_inFileName.empty() || _outFileName.empty())
+        return Result::badArgs;
 
     return Result::ok;
 }
