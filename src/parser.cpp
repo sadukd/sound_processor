@@ -68,7 +68,7 @@ Result ArgsParser::parse(int argc, char* argv[])
         case Mode::filterName:
             if(!currentFilter)
                 return Result::badArgs;
-
+                
             currentFilter->filterName = cur;
             mode = Mode::filterArgs;
             break;
