@@ -1,11 +1,12 @@
-#include <catch2/catch_test_macros.hpp>
 #include "wav_reader.h"
 #include "waveform.h"
-#include <fstream>
+#include <catch2/catch_test_macros.hpp>
 #include <cstdint>
+#include <fstream>
 #include <vector>
 
-static void writeWav16Mono(const std::string& path, const std::vector<int16_t>& samples)
+static void writeWav16Mono(const std::string& path,
+                           const std::vector<int16_t>& samples)
 {
     std::ofstream f(path, std::ios::binary);
 

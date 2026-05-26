@@ -1,10 +1,10 @@
 #include "wav_reader.h"
 #include "wav_structures.h"
-#include <fstream>
-#include <vector>
-#include <stdexcept>
-#include <cstring>
 #include <algorithm>
+#include <cstring>
+#include <fstream>
+#include <stdexcept>
+#include <vector>
 
 bool char4Cmp(const char a[4], const char* b)
 {
@@ -14,19 +14,19 @@ bool char4Cmp(const char a[4], const char* b)
 Waveform WavReader::read(const std::string& path)
 {
     std::ifstream file(path, std::ios::binary);
-    if (!file)
+    if(!file)
         throw std::runtime_error("Cannot open file");
 
     RiffHeader riff{};
     file.read(reinterpret_cast<char*>(&riff), sizeof(riff));
 
-    if (!file)
+    if(!file)
         throw std::runtime_error("Invalid RIFF header");
 
-    if (!char4Cmp(riff.chunkId, "RIFF"))
+    if(!char4Cmp(riff.chunkId, "RIFF"))
         throw std::runtime_error("Not RIFF file");
 
-    if (!char4Cmp(riff.format, "WAVE"))
+    if(!char4Cmp(riff.format, "WAVE"))
         throw std::runtime_error("Not WAVE format");
 
     FmtPayload fmt{};
@@ -35,39 +35,39 @@ Waveform WavReader::read(const std::string& path)
     std::vector<int16_t> samples;
 
     ChunkHeader chunk{};
-    while (file.read(reinterpret_cast<char*>(&chunk), sizeof(chunk)))
+    while(file.read(reinterpret_cast<char*>(&chunk), sizeof(chunk)))
     {
-        if (char4Cmp(chunk.chunkId, "fmt "))
+        if(char4Cmp(chunk.chunkId, "fmt "))
         {
             file.read(reinterpret_cast<char*>(&fmt), sizeof(fmt));
 
             fmtFound = true;
 
-            if (fmt.bitsPerSample != 16)
+            if(fmt.bitsPerSample != 16)
                 throw std::runtime_error("Only 16-bit PCM supported");
 
-            if (fmt.numChannels != 1)
+            if(fmt.numChannels != 1)
                 throw std::runtime_error("Only mono supported");
 
-            if (chunk.chunkSize > sizeof(fmt))
+            if(chunk.chunkSize > sizeof(fmt))
                 file.seekg(chunk.chunkSize - sizeof(fmt), std::ios::cur);
 
-            if (chunk.chunkSize % 2)
+            if(chunk.chunkSize % 2)
                 file.seekg(1, std::ios::cur);
 
             continue;
         }
 
-        if (char4Cmp(chunk.chunkId, "data"))
+        if(char4Cmp(chunk.chunkId, "data"))
         {
-            if (!fmtFound)
+            if(!fmtFound)
                 throw std::runtime_error("Data before fmt");
 
             samples.resize(chunk.chunkSize / sizeof(uint16_t));
 
             file.read(reinterpret_cast<char*>(samples.data()), chunk.chunkSize);
 
-            if (chunk.chunkSize % 2)
+            if(chunk.chunkSize % 2)
                 file.seekg(1, std::ios::cur);
 
             break;

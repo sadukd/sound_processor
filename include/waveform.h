@@ -1,14 +1,13 @@
 #pragma once
 
-#include <vector>
 #include <cstdint>
+#include <vector>
 
 class Waveform
 {
 public:
-
-    Waveform() : _samples() {}
-    Waveform(std::vector<int16_t> samples) : _samples(std::move(samples)) {}
+    Waveform(): _samples() {}
+    Waveform(std::vector<int16_t> samples): _samples(std::move(samples)) {}
 
     static uint16_t constexpr SampleRate = 44100;
 
@@ -25,6 +24,7 @@ public:
     void setSample(size_t i, int16_t sample);
 
     double samplesToSeconds(size_t samples) const;
+
 private:
     std::vector<int16_t> _samples;
 };
