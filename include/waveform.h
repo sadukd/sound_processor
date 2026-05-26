@@ -6,6 +6,9 @@
 class Waveform
 {
 public:
+    Waveform(): _samples() {}
+    Waveform(std::vector<int16_t> samples): _samples(std::move(samples)) {}
+
     static uint16_t constexpr SampleRate = 44100;
 
     static uint16_t constexpr SampleSize = 16; // bits
