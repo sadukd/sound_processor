@@ -23,7 +23,7 @@ double Waveform::samplesToSeconds(size_t samples) const
     return static_cast<double>(samples) / SampleRate;
 }
 
-const std::vector<int16_t>& getSamples() const
+const std::vector<int16_t>& Waveform::getSamples() const
 {
-    return _samples&;
+    return _samples;
 }

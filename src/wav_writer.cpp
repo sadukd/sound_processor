@@ -1,8 +1,15 @@
 #include "wav_writer.h"
 #include "wav_structures.h"
+#include <fstream>
+#include <stdexcept>
 
-void writer(const std::string& path, const Waveform& wf)
+void WavWriter::writer(const std::string& path, const Waveform& wf)
 {
+    std::ofstream file(path, std::ios::binary);
+
+    if (!file)
+        throw std::runtime_error("Cannot open file");
+
     uint32_t fileSize = 36 + wf.samplesCount() * wf.SampleSize / 8;
 
     RiffHeader riff{
@@ -33,8 +40,33 @@ void writer(const std::string& path, const Waveform& wf)
 
     ChunkHeader dataHeader{
         {'d', 'a', 't', 'a'},
-        wf.samplesCount() * wf.SampleSize / 8
+        static_cast<uint32_t>(wf.samplesCount() * wf.SampleSize / 8)
     };
 
-    
+    file.write(
+        reinterpret_cast<const char*>(&riff),
+        sizeof(riff)
+    );
+
+    file.write(
+        reinterpret_cast<const char*>(&fmtHeader),
+        sizeof(fmtHeader)
+    );
+
+    file.write(
+        reinterpret_cast<const char*>(&fmtPayload),
+        sizeof(fmtPayload)
+    );
+
+    file.write(
+        reinterpret_cast<const char*>(&dataHeader),
+        sizeof(dataHeader)
+    );
+
+    file.write(
+        reinterpret_cast<const char*>(
+            wf.getSamples().data()
+        ),
+        wf.samplesCount() * wf.SampleSize / 8
+    );
 }

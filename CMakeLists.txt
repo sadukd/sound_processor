@@ -22,9 +22,14 @@ add_library(wav_reader
     src/wav_reader.cpp
 )
 
+add_library(wav_writer
+    src/wav_writer.cpp
+)
+
 target_include_directories(parser PUBLIC include)
 target_include_directories(waveform PUBLIC include)
 target_include_directories(wav_reader PUBLIC include)
+target_include_directories(wav_writer PUBLIC include)
 
 # ─────────────────────────────
 # APP
@@ -38,6 +43,7 @@ target_link_libraries(app
     parser
     waveform
     wav_reader
+    wav_writer
 )
 
 # ─────────────────────────────
@@ -88,7 +94,7 @@ target_link_libraries(waveform_tests
 catch_discover_tests(waveform_tests)
 
 # ─────────────────────────────
-# WAV READER TESTS (НОВОЕ)
+# WAV READER TESTS
 # ─────────────────────────────
 
 add_executable(wav_reader_tests
@@ -96,6 +102,21 @@ add_executable(wav_reader_tests
 )
 
 target_link_libraries(wav_reader_tests
+    wav_reader
+    waveform
+    Catch2::Catch2WithMain
+)
+
+# ─────────────────────────────
+# WAV WRITER TESTS
+# ─────────────────────────────
+
+add_executable(wav_writer_tests
+    tests/test_wav_writer.cpp
+)
+
+target_link_libraries(wav_writer_tests
+    wav_writer
     wav_reader
     waveform
     Catch2::Catch2WithMain
