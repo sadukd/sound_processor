@@ -8,6 +8,12 @@ class Waveform
 public:
     static uint16_t constexpr SampleRate = 44100;
 
+    static uint16_t constexpr SampleSize = 16; // bits
+
+    static uint16_t constexpr AudioFormat = 1; // PCM
+
+    static uint16_t constexpr ChannelAmnt = 1; // Mono
+
     double durationSeconds() const;
 
     size_t samplesCount() const;
