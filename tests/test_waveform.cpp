@@ -1,16 +1,14 @@
-#include <catch2/catch_test_macros.hpp>
-#include <catch2/catch_approx.hpp>
 #include "waveform.h"
+#include <catch2/catch_approx.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 using Catch::Approx;
 TEST_CASE("duration and samples count")
 {
     Waveform w;
 
-    for (int i = 0; i < 44100; i++)
-    {
+    for(int i = 0; i < 44100; i++)
         w.appendSample(100);
-    }
 
     REQUIRE(w.samplesCount() == 44100);
     REQUIRE(w.durationSeconds() == Approx(1.0));
@@ -48,15 +46,9 @@ TEST_CASE("out of range access throws")
 
     w.appendSample(1);
 
-    REQUIRE_THROWS_AS(
-        w.getSample(10),
-        std::out_of_range
-    );
+    REQUIRE_THROWS_AS(w.getSample(10), std::out_of_range);
 
-    REQUIRE_THROWS_AS(
-        w.setSample(10, 5),
-        std::out_of_range
-    );
+    REQUIRE_THROWS_AS(w.setSample(10, 5), std::out_of_range);
 }
 
 TEST_CASE("empty waveform")

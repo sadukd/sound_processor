@@ -1,7 +1,7 @@
 #pragma once
 
-#include <vector>
 #include <cstdint>
+#include <vector>
 
 class Waveform
 {
@@ -21,6 +21,7 @@ public:
     void setSample(size_t i, int16_t sample);
 
     double samplesToSeconds(size_t samples) const;
+
 private:
     std::vector<int16_t> _samples;
 };
