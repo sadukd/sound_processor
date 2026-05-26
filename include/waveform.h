@@ -31,6 +31,7 @@ public:
 
     double samplesToSeconds(size_t samples) const;
 
+    const std::vector<int16_t>& getSamples() const;
 private:
     std::vector<int16_t> _samples;
 };
