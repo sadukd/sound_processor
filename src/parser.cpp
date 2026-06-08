@@ -85,7 +85,7 @@ Result ArgsParser::parse(int argc, char* argv[])
         }
     }
 
-    if(_inFileName.empty() || _outFileName.empty())
+    if(_outFileName.empty())
         return Result::badArgs;
 
     return Result::ok;
