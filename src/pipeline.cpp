@@ -17,8 +17,3 @@ void Pipeline::apply(Waveform& sound) const
 }
 
 size_t Pipeline::getFilterCount() const { return _filters.size(); }
-
-const IFilter& Pipeline::operator[](size_t index) const
-{
-    return *_filters.at(index);
-}

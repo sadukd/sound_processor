@@ -14,7 +14,6 @@ public:
     void apply(Waveform& sound) const;
 
     size_t getFilterCount() const;
-    const IFilter& operator[](size_t index) const;
 
 private:
     std::vector<std::unique_ptr<IFilter>> _filters;
