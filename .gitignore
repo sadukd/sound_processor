@@ -1,33 +1,5 @@
 # Build folders
-build/
-bin/
-out/
-
-# Object files
-*.o
-*.obj
-*.so
-*.a
-*.lib
-
-# Executables
-*.exe
-*.out
-*.app
-
-# Debug files
-*.dSYM/
-*.stackdump
-
-# CMake
-CMakeFiles/
-CMakeCache.txt
-cmake_install.cmake
-compile_commands.json
-Makefile
+build
 
 # VS Code
-.vscode/
-
-# Windows
-Thumbs.db
+.vscode
