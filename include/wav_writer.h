@@ -1,10 +1,13 @@
-#pragma once
+#ifndef WAV_WRITER_H
+#define WAV_WRITER_H
 
-#include <string>
 #include "waveform.h"
+#include <string>
 
 class WavWriter
 {
 public:
-    void writer(const std::string& path, const Waveform& wf);
+    void write(const std::string& path, const Waveform& waveform);
 };
+
+#endif
