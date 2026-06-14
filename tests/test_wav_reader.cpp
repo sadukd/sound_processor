@@ -8,18 +8,18 @@
 static void writeWav16Mono(const std::string& path,
                            const std::vector<int16_t>& samples)
 {
-    std::ofstream f(path, std::ios::binary);
+    std::ofstream file(path, std::ios::binary);
 
     uint32_t dataSize = samples.size() * sizeof(int16_t);
     uint32_t fmtSize = 16;
     uint32_t riffSize = 4 + (8 + fmtSize) + (8 + dataSize);
 
-    f.write("RIFF", 4);
-    f.write(reinterpret_cast<char*>(&riffSize), 4);
-    f.write("WAVE", 4);
+    file.write("RIFF", 4);
+    file.write(reinterpret_cast<char*>(&riffSize), 4);
+    file.write("WAVE", 4);
 
-    f.write("fmt ", 4);
-    f.write(reinterpret_cast<char*>(&fmtSize), 4);
+    file.write("fmt ", 4);
+    file.write(reinterpret_cast<char*>(&fmtSize), 4);
 
     uint16_t audioFormat = 1;
     uint16_t channels = 1;
@@ -28,16 +28,16 @@ static void writeWav16Mono(const std::string& path,
     uint16_t blockAlign = channels * sizeof(int16_t);
     uint16_t bitsPerSample = 16;
 
-    f.write(reinterpret_cast<char*>(&audioFormat), 2);
-    f.write(reinterpret_cast<char*>(&channels), 2);
-    f.write(reinterpret_cast<char*>(&sampleRate), 4);
-    f.write(reinterpret_cast<char*>(&byteRate), 4);
-    f.write(reinterpret_cast<char*>(&blockAlign), 2);
-    f.write(reinterpret_cast<char*>(&bitsPerSample), 2);
+    file.write(reinterpret_cast<char*>(&audioFormat), 2);
+    file.write(reinterpret_cast<char*>(&channels), 2);
+    file.write(reinterpret_cast<char*>(&sampleRate), 4);
+    file.write(reinterpret_cast<char*>(&byteRate), 4);
+    file.write(reinterpret_cast<char*>(&blockAlign), 2);
+    file.write(reinterpret_cast<char*>(&bitsPerSample), 2);
 
-    f.write("data", 4);
-    f.write(reinterpret_cast<char*>(&dataSize), 4);
-    f.write(reinterpret_cast<const char*>(samples.data()), dataSize);
+    file.write("data", 4);
+    file.write(reinterpret_cast<char*>(&dataSize), 4);
+    file.write(reinterpret_cast<const char*>(samples.data()), dataSize);
 }
 
 TEST_CASE("WavReader reads valid mono PCM16 file")
@@ -47,41 +47,41 @@ TEST_CASE("WavReader reads valid mono PCM16 file")
     std::vector<int16_t> input = {100, -100, 300, -300, 0};
     writeWav16Mono(path, input);
 
-    WavReader r;
-    Waveform w = r.read(path);
+    WavReader reader;
+    Waveform waveform = reader.read(path);
 
-    REQUIRE(w.samplesCount() == input.size());
+    REQUIRE(waveform.samplesCount() == input.size());
 }
 
 TEST_CASE("WavReader rejects non-existent file")
 {
-    WavReader r;
+    WavReader reader;
 
-    REQUIRE_THROWS(r.read("no_file.wav"));
+    REQUIRE_THROWS(reader.read("no_file.wav"));
 }
 
 TEST_CASE("WavReader rejects invalid RIFF")
 {
-    std::ofstream f("bad.wav", std::ios::binary);
-    f.write("XXXX", 4);
+    std::ofstream file("bad.wav", std::ios::binary);
+    file.write("XXXX", 4);
 
-    WavReader r;
+    WavReader reader;
 
-    REQUIRE_THROWS(r.read("bad.wav"));
+    REQUIRE_THROWS(reader.read("bad.wav"));
 }
 
 TEST_CASE("WavReader rejects non-WAVE format")
 {
-    std::ofstream f("bad2.wav", std::ios::binary);
+    std::ofstream file("bad2.wav", std::ios::binary);
 
     uint32_t size = 0;
-    f.write("RIFF", 4);
-    f.write(reinterpret_cast<char*>(&size), 4);
-    f.write("BEEF", 4);
+    file.write("RIFF", 4);
+    file.write(reinterpret_cast<char*>(&size), 4);
+    file.write("BEEF", 4);
 
-    WavReader r;
+    WavReader reader;
 
-    REQUIRE_THROWS(r.read("bad2.wav"));
+    REQUIRE_THROWS(reader.read("bad2.wav"));
 }
 
 TEST_CASE("WavReader handles empty data chunk")
@@ -91,8 +91,8 @@ TEST_CASE("WavReader handles empty data chunk")
     std::vector<int16_t> input = {};
     writeWav16Mono(path, input);
 
-    WavReader r;
-    Waveform w = r.read(path);
+    WavReader reader;
+    Waveform waveform = reader.read(path);
 
-    REQUIRE(w.samplesCount() == 0);
+    REQUIRE(waveform.samplesCount() == 0);
 }
