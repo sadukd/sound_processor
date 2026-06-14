@@ -1,12 +1,14 @@
-#pragma once
+#ifndef PARSER_H
+#define PARSER_H
 
-#include <string>
+#include <optional>
+#include <string_view>
 #include <vector>
 
 struct FilterDescriptor
 {
-    std::string filterName;
-    std::vector<std::string> params;
+    std::string_view filterName;
+    std::vector<std::string_view> params;
 };
 
 enum class Result
@@ -22,15 +24,20 @@ public:
     Result parse(int argc, char* argv[]);
 
 public:
-    const std::string& getInFileName() const { return _inFileName; }
-    const std::string& getOutFileName() const { return _outFileName; }
-    const std::vector<FilterDescriptor>& getFilters() const
+    const std::optional<std::string_view>& getInFileName() const
     {
-        return _filterDescriptors;
+        return _inFileName;
     }
+    const std::optional<std::string_view>& getOutFileName() const
+    {
+        return _outFileName;
+    }
+    const std::vector<FilterDescriptor>& getFilters() const { return _filterDescriptors; }
 
 private:
-    std::string _inFileName;
-    std::string _outFileName;
+    std::optional<std::string_view> _inFileName;
+    std::optional<std::string_view> _outFileName;
     std::vector<FilterDescriptor> _filterDescriptors;
 };
+
+#endif

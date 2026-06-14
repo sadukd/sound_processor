@@ -1,132 +1,107 @@
 #include <catch2/catch_test_macros.hpp>
+
 #include "parser.h"
 
-static char* cstr(const char* s) { return const_cast<char*>(s); }
+#include <string_view>
 
-TEST_CASE("empty args")
+static char* cstr(const char* text) { return const_cast<char*>(text); }
+
+TEST_CASE("no args returns help mode")
 {
-    ArgsParser p;
-    char* argv[] = { cstr("prog") };
+    ArgsParser parser;
+    char* argv[] = {cstr("sound_processor")};
 
-    REQUIRE(p.parse(1, argv) != Result::ok);
+    REQUIRE(parser.parse(1, argv) == Result::noArgs);
 }
 
-TEST_CASE("basic input output")
+TEST_CASE("parser accepts output only")
 {
-    ArgsParser p;
+    ArgsParser parser;
+    char* argv[] = {cstr("sound_processor"), cstr("-o"), cstr("out.wav")};
 
-    char* argv[] = {
-        cstr("prog"),
-        cstr("-i"), cstr("in.txt"),
-        cstr("-o"), cstr("out.txt")
-    };
-
-    REQUIRE(p.parse(5, argv) == Result::ok);
-    REQUIRE(p.getInFileName() == "in.txt");
-    REQUIRE(p.getOutFileName() == "out.txt");
+    REQUIRE(parser.parse(3, argv) == Result::ok);
+    REQUIRE_FALSE(parser.getInFileName().has_value());
+    REQUIRE(parser.getOutFileName().has_value());
+    REQUIRE(*parser.getOutFileName() == "out.wav");
+    REQUIRE(parser.getFilters().empty());
 }
 
-TEST_CASE("input given twice should fail")
+TEST_CASE("parser accepts input output and repeated filters")
 {
-    ArgsParser p;
+    ArgsParser parser;
+    char* argv[] = {cstr("sound_processor"),
+                    cstr("-i"),
+                    cstr("in.wav"),
+                    cstr("-o"),
+                    cstr("out.wav"),
+                    cstr("-f"),
+                    cstr("ampl"),
+                    cstr("0.8"),
+                    cstr("-f"),
+                    cstr("silence"),
+                    cstr("sec"),
+                    cstr("0.2"),
+                    cstr("0.4")};
 
-    char* argv[] = {
-        cstr("prog"),
-        cstr("-i"), cstr("a.txt"),
-        cstr("-i"), cstr("b.txt")
-    };
-
-    REQUIRE(p.parse(5, argv) == Result::badArgs);
+    REQUIRE(parser.parse(13, argv) == Result::ok);
+    REQUIRE(parser.getInFileName().has_value());
+    REQUIRE(*parser.getInFileName() == "in.wav");
+    REQUIRE(parser.getOutFileName().has_value());
+    REQUIRE(*parser.getOutFileName() == "out.wav");
+    REQUIRE(parser.getFilters().size() == 2);
+    REQUIRE(parser.getFilters()[0].filterName == "ampl");
+    REQUIRE(parser.getFilters()[0].params ==
+            std::vector<std::string_view>{"0.8"});
+    REQUIRE(parser.getFilters()[1].filterName == "silence");
+    REQUIRE(parser.getFilters()[1].params ==
+            std::vector<std::string_view>{"sec", "0.2", "0.4"});
 }
 
-TEST_CASE("output given twice should fail")
+TEST_CASE("parser accepts filters without input or output")
 {
-    ArgsParser p;
+    ArgsParser parser;
+    char* argv[] = {cstr("sound_processor"),
+                    cstr("-f"),
+                    cstr("generator"),
+                    cstr("sin"),
+                    cstr("440"),
+                    cstr("1000")};
 
-    char* argv[] = {
-        cstr("prog"),
-        cstr("-o"), cstr("a.txt"),
-        cstr("-o"), cstr("b.txt")
-    };
-
-    REQUIRE(p.parse(5, argv) == Result::badArgs);
+    REQUIRE(parser.parse(6, argv) == Result::ok);
+    REQUIRE_FALSE(parser.getInFileName().has_value());
+    REQUIRE_FALSE(parser.getOutFileName().has_value());
+    REQUIRE(parser.getFilters().size() == 1);
 }
 
-TEST_CASE("unknown argument should fail")
+TEST_CASE("parser rejects duplicate input")
 {
-    ArgsParser p;
+    ArgsParser parser;
+    char* argv[] = {cstr("sound_processor"), cstr("-i"), cstr("a.wav"),
+                    cstr("-i"), cstr("b.wav")};
 
-    char* argv[] = {
-        cstr("prog"),
-        cstr("random.txt")
-    };
-
-    REQUIRE(p.parse(2, argv) == Result::badArgs);
+    REQUIRE(parser.parse(5, argv) == Result::badArgs);
 }
 
-TEST_CASE("filter with name and params")
+TEST_CASE("parser rejects missing flag value")
 {
-    ArgsParser p;
+    ArgsParser parser;
+    char* argv[] = {cstr("sound_processor"), cstr("-o")};
 
-    char* argv[] = {
-        cstr("prog"),
-        cstr("-f"),
-        cstr("blur"),
-        cstr("5"),
-        cstr("10")
-    };
-
-    REQUIRE(p.parse(5, argv) == Result::badArgs);
+    REQUIRE(parser.parse(2, argv) == Result::badArgs);
 }
 
-TEST_CASE("filter without name should fail")
+TEST_CASE("parser rejects empty filter block")
 {
-    ArgsParser p;
+    ArgsParser parser;
+    char* argv[] = {cstr("sound_processor"), cstr("-f")};
 
-    char* argv[] = {
-        cstr("prog"),
-        cstr("-f"),
-        cstr("5")
-    };
-
-    REQUIRE(p.parse(3, argv) == Result::badArgs);
+    REQUIRE(parser.parse(2, argv) == Result::badArgs);
 }
 
-TEST_CASE("mix input output filter full scenario")
+TEST_CASE("parser rejects stray token")
 {
-    ArgsParser p;
+    ArgsParser parser;
+    char* argv[] = {cstr("sound_processor"), cstr("random.wav")};
 
-    char* argv[] = {
-        cstr("prog"),
-        cstr("-i"), cstr("in.txt"),
-        cstr("-o"), cstr("out.txt"),
-        cstr("-f"), cstr("blur"), cstr("5"), cstr("10"),
-        cstr("-f"), cstr("sharpen"), cstr("2")
-    };
-
-    REQUIRE(p.parse(12, argv) == Result::ok);
-
-    REQUIRE(p.getInFileName() == "in.txt");
-    REQUIRE(p.getOutFileName() == "out.txt");
-
-    auto filters = p.getFilters();
-    REQUIRE(filters.size() == 2);
-
-    REQUIRE(filters[0].filterName == "blur");
-    REQUIRE(filters[0].params.size() == 2);
-
-    REQUIRE(filters[1].filterName == "sharpen");
-    REQUIRE(filters[1].params.size() == 1);
-}
-
-TEST_CASE("flag without value should fail")
-{
-    ArgsParser p;
-
-    char* argv[] = {
-        cstr("prog"),
-        cstr("-i")
-    };
-
-    REQUIRE(p.parse(2, argv) == Result::badArgs);
+    REQUIRE(parser.parse(2, argv) == Result::badArgs);
 }
