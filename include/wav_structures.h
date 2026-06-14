@@ -1,4 +1,5 @@
-#pragma once
+#ifndef WAV_STRUCTURES_H
+#define WAV_STRUCTURES_H
 
 #include <cstdint>
 
@@ -28,3 +29,5 @@ struct ChunkHeader
     uint32_t chunkSize;
 };
 #pragma pack(pop)
+
+#endif
