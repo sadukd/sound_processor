@@ -1,6 +1,4 @@
 #include "parser.h"
-#include <string>
-#include <vector>
 
 enum class Mode
 {
@@ -13,36 +11,44 @@ enum class Mode
 
 Result ArgsParser::parse(int argc, char* argv[])
 {
+    _inFileName.reset();
+    _outFileName.reset();
+    _filterDescriptors.clear();
+
     if(argc <= 1)
-        return Result::badArgs;
+        return Result::noArgs;
 
     Mode mode = Mode::none;
     FilterDescriptor* currentFilter = nullptr;
 
     for(int i = 1; i < argc; i++)
     {
-        std::string cur = argv[i];
+        std::string_view token = argv[i];
 
-        if(cur == "-i")
+        if(token == "-i")
         {
-            if(!_inFileName.empty())
+            if(_inFileName.has_value() || mode != Mode::none)
                 return Result::badArgs;
 
             mode = Mode::input;
             continue;
         }
 
-        if(cur == "-o")
+        if(token == "-o")
         {
-            if(!_outFileName.empty())
+            if(_outFileName.has_value() || mode != Mode::none)
                 return Result::badArgs;
 
             mode = Mode::output;
             continue;
         }
 
-        if(cur == "-f")
+        if(token == "-f")
         {
+            if(mode == Mode::input || mode == Mode::output ||
+               mode == Mode::filterName)
+                return Result::badArgs;
+
             _filterDescriptors.push_back(FilterDescriptor{});
             currentFilter = &_filterDescriptors.back();
 
@@ -50,18 +56,18 @@ Result ArgsParser::parse(int argc, char* argv[])
             continue;
         }
 
-        if(cur[0] == '-')
+        if(!token.empty() && token[0] == '-')
             return Result::badArgs;
 
         switch(mode)
         {
         case Mode::input:
-            _inFileName = cur;
+            _inFileName = std::move(token);
             mode = Mode::none;
             break;
 
         case Mode::output:
-            _outFileName = cur;
+            _outFileName = std::move(token);
             mode = Mode::none;
             break;
 
@@ -69,7 +75,7 @@ Result ArgsParser::parse(int argc, char* argv[])
             if(!currentFilter)
                 return Result::badArgs;
 
-            currentFilter->filterName = cur;
+            currentFilter->filterName = token;
             mode = Mode::filterArgs;
             break;
 
@@ -77,7 +83,7 @@ Result ArgsParser::parse(int argc, char* argv[])
             if(!currentFilter)
                 return Result::badArgs;
 
-            currentFilter->params.push_back(cur);
+            currentFilter->params.push_back(token);
             break;
 
         case Mode::none:
@@ -85,7 +91,7 @@ Result ArgsParser::parse(int argc, char* argv[])
         }
     }
 
-    if(_outFileName.empty())
+    if(mode == Mode::input || mode == Mode::output || mode == Mode::filterName)
         return Result::badArgs;
 
     return Result::ok;
