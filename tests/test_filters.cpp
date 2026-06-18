@@ -81,6 +81,12 @@ TEST_CASE("sine generator replaces input")
     REQUIRE(sound.getSample(0) == 0);
 }
 
+TEST_CASE("sine generator rejects negative duration")
+{
+    REQUIRE_THROWS_WITH(SineGenerator(440.0, -100.0),
+                        "Generator sin duration must be non-negative");
+}
+
 TEST_CASE("am generator creates expected sample count")
 {
     Waveform sound;
@@ -91,6 +97,12 @@ TEST_CASE("am generator creates expected sample count")
     REQUIRE(sound.samplesCount() == Waveform().millisecondsToSamples(250.0));
 }
 
+TEST_CASE("am generator rejects negative duration")
+{
+    REQUIRE_THROWS_WITH(AmGenerator(0.5, 440.0, 4.0, 0.8, -100.0),
+                        "Generator am duration must be non-negative");
+}
+
 TEST_CASE("fm generator creates expected sample count")
 {
     Waveform sound;
@@ -99,4 +111,10 @@ TEST_CASE("fm generator creates expected sample count")
     generator.apply(sound);
 
     REQUIRE(sound.samplesCount() == Waveform().millisecondsToSamples(250.0));
+}
+
+TEST_CASE("fm generator rejects negative duration")
+{
+    REQUIRE_THROWS_WITH(FmGenerator(0.5, 440.0, 5.0, 100.0, -100.0),
+                        "Generator fm duration must be non-negative");
 }

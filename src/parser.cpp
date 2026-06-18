@@ -27,7 +27,8 @@ Result ArgsParser::parse(int argc, char* argv[])
 
         if(token == "-i")
         {
-            if(_inFileName.has_value() || mode != Mode::none)
+            if(_inFileName.has_value() || mode == Mode::input ||
+               mode == Mode::output || mode == Mode::filterName)
                 return Result::badArgs;
 
             mode = Mode::input;
@@ -36,7 +37,8 @@ Result ArgsParser::parse(int argc, char* argv[])
 
         if(token == "-o")
         {
-            if(_outFileName.has_value() || mode != Mode::none)
+            if(_outFileName.has_value() || mode == Mode::input ||
+               mode == Mode::output || mode == Mode::filterName)
                 return Result::badArgs;
 
             mode = Mode::output;
@@ -56,7 +58,7 @@ Result ArgsParser::parse(int argc, char* argv[])
             continue;
         }
 
-        if(!token.empty() && token[0] == '-')
+        if(!token.empty() && token[0] == '-' && mode != Mode::filterArgs)
             return Result::badArgs;
 
         switch(mode)

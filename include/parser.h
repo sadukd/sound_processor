@@ -32,7 +32,10 @@ public:
     {
         return _outFileName;
     }
-    const std::vector<FilterDescriptor>& getFilters() const { return _filterDescriptors; }
+    const std::vector<FilterDescriptor>& getFilters() const
+    {
+        return _filterDescriptors;
+    }
 
 private:
     std::optional<std::string_view> _inFileName;

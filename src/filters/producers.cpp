@@ -8,9 +8,9 @@
 #include "filters/timestretch.h"
 
 #include <memory>
+#include <stdexcept>
 #include <string>
 #include <string_view>
-#include <stdexcept>
 
 namespace FilterProducers {
 namespace {
@@ -18,10 +18,10 @@ double parseDouble(std::string_view raw, const std::string& filterName)
 {
     try
     {
-        const std::string rawString(raw);
+        const std::string RAW_STRING(raw);
         size_t pos = 0;
-        double value = std::stod(rawString, &pos);
-        if(pos != rawString.size())
+        double value = std::stod(RAW_STRING, &pos);
+        if(pos != RAW_STRING.size())
             throw std::invalid_argument("Trailing characters");
         return value;
     }
@@ -36,10 +36,10 @@ int parseInt(std::string_view raw, const std::string& filterName)
 {
     try
     {
-        const std::string rawString(raw);
+        const std::string RAW_STRING(raw);
         size_t pos = 0;
-        int value = std::stoi(rawString, &pos);
-        if(pos != rawString.size())
+        int value = std::stoi(RAW_STRING, &pos);
+        if(pos != RAW_STRING.size())
             throw std::invalid_argument("Trailing characters");
         return value;
     }
@@ -106,9 +106,9 @@ createGeneratorFilter(const FilterDescriptor& descriptor)
     if(descriptor.params.empty())
         throw std::runtime_error("Filter generator expects a generator type");
 
-    const std::string_view generatorType = descriptor.params[0];
+    const std::string_view GENERATOR_TYPE = descriptor.params[0];
 
-    if(generatorType == "sin")
+    if(GENERATOR_TYPE == "sin")
     {
         if(descriptor.params.size() != 3)
             throw std::runtime_error("Generator sin expects 2 parameters");
@@ -118,7 +118,7 @@ createGeneratorFilter(const FilterDescriptor& descriptor)
             parseDouble(descriptor.params[2], "generator sin"));
     }
 
-    if(generatorType == "am")
+    if(GENERATOR_TYPE == "am")
     {
         if(descriptor.params.size() != 6)
             throw std::runtime_error("Generator am expects 5 parameters");
@@ -131,7 +131,7 @@ createGeneratorFilter(const FilterDescriptor& descriptor)
             parseDouble(descriptor.params[5], "generator am"));
     }
 
-    if(generatorType == "fm")
+    if(GENERATOR_TYPE == "fm")
     {
         if(descriptor.params.size() != 6)
             throw std::runtime_error("Generator fm expects 5 parameters");
@@ -145,6 +145,6 @@ createGeneratorFilter(const FilterDescriptor& descriptor)
     }
 
     throw std::runtime_error("Unknown generator type: " +
-                             std::string(generatorType));
+                             std::string(GENERATOR_TYPE));
 }
 }  // namespace FilterProducers

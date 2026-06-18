@@ -73,6 +73,74 @@ TEST_CASE("parser accepts filters without input or output")
     REQUIRE(parser.getFilters().size() == 1);
 }
 
+TEST_CASE("parser accepts negative filter parameters")
+{
+    ArgsParser parser;
+    char* argv[] = {cstr("sound_processor"),
+                    cstr("-f"),
+                    cstr("generator"),
+                    cstr("sin"),
+                    cstr("440"),
+                    cstr("-100"),
+                    cstr("-o"),
+                    cstr("out.wav")};
+
+    REQUIRE(parser.parse(8, argv) == Result::ok);
+    REQUIRE(parser.getFilters().size() == 1);
+    REQUIRE(parser.getFilters()[0].params ==
+            std::vector<std::string_view>{"sin", "440", "-100"});
+    REQUIRE(parser.getOutFileName().has_value());
+    REQUIRE(*parser.getOutFileName() == "out.wav");
+}
+
+TEST_CASE("parser accepts output after filter arguments")
+{
+    ArgsParser parser;
+    char* argv[] = {cstr("sound_processor"),
+                    cstr("-f"),
+                    cstr("generator"),
+                    cstr("sin"),
+                    cstr("440"),
+                    cstr("1000"),
+                    cstr("-o"),
+                    cstr("Output.wav")};
+
+    REQUIRE(parser.parse(8, argv) == Result::ok);
+    REQUIRE(parser.getOutFileName().has_value());
+    REQUIRE(*parser.getOutFileName() == "Output.wav");
+    REQUIRE(parser.getFilters().size() == 1);
+    REQUIRE(parser.getFilters()[0].filterName == "generator");
+    REQUIRE(parser.getFilters()[0].params ==
+            std::vector<std::string_view>{"sin", "440", "1000"});
+}
+
+TEST_CASE("parser accepts repeated filter after output following filter")
+{
+    ArgsParser parser;
+    char* argv[] = {cstr("sound_processor"),
+                    cstr("-f"),
+                    cstr("generator"),
+                    cstr("sin"),
+                    cstr("440"),
+                    cstr("1000"),
+                    cstr("-o"),
+                    cstr("out.wav"),
+                    cstr("-f"),
+                    cstr("ampl"),
+                    cstr("0.5")};
+
+    REQUIRE(parser.parse(11, argv) == Result::ok);
+    REQUIRE(parser.getOutFileName().has_value());
+    REQUIRE(*parser.getOutFileName() == "out.wav");
+    REQUIRE(parser.getFilters().size() == 2);
+    REQUIRE(parser.getFilters()[0].filterName == "generator");
+    REQUIRE(parser.getFilters()[0].params ==
+            std::vector<std::string_view>{"sin", "440", "1000"});
+    REQUIRE(parser.getFilters()[1].filterName == "ampl");
+    REQUIRE(parser.getFilters()[1].params ==
+            std::vector<std::string_view>{"0.5"});
+}
+
 TEST_CASE("parser rejects duplicate input")
 {
     ArgsParser parser;
@@ -90,12 +158,28 @@ TEST_CASE("parser rejects missing flag value")
     REQUIRE(parser.parse(2, argv) == Result::badArgs);
 }
 
+TEST_CASE("parser rejects flag instead of output value")
+{
+    ArgsParser parser;
+    char* argv[] = {cstr("sound_processor"), cstr("-o"), cstr("-f")};
+
+    REQUIRE(parser.parse(3, argv) == Result::badArgs);
+}
+
 TEST_CASE("parser rejects empty filter block")
 {
     ArgsParser parser;
     char* argv[] = {cstr("sound_processor"), cstr("-f")};
 
     REQUIRE(parser.parse(2, argv) == Result::badArgs);
+}
+
+TEST_CASE("parser rejects negative filter name")
+{
+    ArgsParser parser;
+    char* argv[] = {cstr("sound_processor"), cstr("-f"), cstr("-100")};
+
+    REQUIRE(parser.parse(3, argv) == Result::badArgs);
 }
 
 TEST_CASE("parser rejects stray token")

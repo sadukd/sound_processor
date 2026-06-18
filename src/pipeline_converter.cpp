@@ -21,14 +21,14 @@ Pipeline PipelineConverter::createPipeline(
 
     for(const auto& filterDescriptor: filters)
     {
-        const std::string filterName(filterDescriptor.filterName);
-        auto producerIt = _producers.find(filterName);
+        const std::string FILTER_NAME(filterDescriptor.filterName);
+        auto producerIt = _producers.find(FILTER_NAME);
         if(producerIt == _producers.end())
-            throw std::runtime_error("Unknown filter: " + filterName);
+            throw std::runtime_error("Unknown filter: " + FILTER_NAME);
 
         auto filter = producerIt->second(filterDescriptor);
         if(!filter)
-            throw std::runtime_error("Failed to create filter: " + filterName);
+            throw std::runtime_error("Failed to create filter: " + FILTER_NAME);
 
         pipeline.addFilter(std::move(filter));
     }

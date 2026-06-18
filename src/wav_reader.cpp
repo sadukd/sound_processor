@@ -2,6 +2,7 @@
 #include "wav_structures.h"
 #include <algorithm>
 #include <cstring>
+#include <filesystem>
 #include <fstream>
 #include <stdexcept>
 #include <vector>
@@ -13,6 +14,9 @@ bool hasChunkId(const char left[4], const char* right)
 
 Waveform WavReader::read(const std::string& path)
 {
+    if(std::filesystem::path(path).extension() != ".wav")
+        throw std::runtime_error("Input file must have .wav extension");
+
     std::ifstream file(path, std::ios::binary);
     if(!file)
         throw std::runtime_error("Cannot open file");

@@ -1,10 +1,14 @@
 #include "wav_writer.h"
 #include "wav_structures.h"
+#include <filesystem>
 #include <fstream>
 #include <stdexcept>
 
 void WavWriter::write(const std::string& path, const Waveform& waveform)
 {
+    if(std::filesystem::path(path).extension() != ".wav")
+        throw std::runtime_error("Output file must have .wav extension");
+
     std::ofstream file(path, std::ios::binary);
 
     if(!file)

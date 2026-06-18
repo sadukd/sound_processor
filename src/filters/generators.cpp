@@ -19,9 +19,13 @@ std::vector<int16_t> allocateSamples(double durationMs)
 SineGenerator::SineGenerator(double frequencyHz, double durationMs)
     : _frequencyHz(frequencyHz), _durationMs(durationMs)
 {
-    if(frequencyHz < 0.0 || durationMs < 0.0)
+    if(durationMs < 0.0)
         throw std::invalid_argument(
-            "Generator sin parameters must be non-negative");
+            "Generator sin duration must be non-negative");
+
+    if(frequencyHz < 0.0)
+        throw std::invalid_argument(
+            "Generator sin frequency must be non-negative");
 }
 
 void SineGenerator::apply(Waveform& sound)
@@ -43,8 +47,12 @@ AmGenerator::AmGenerator(double amplitude, double carrierHz,
     : _amplitude(amplitude), _carrierHz(carrierHz), _modulationHz(modulationHz),
       _depth(depth), _durationMs(durationMs)
 {
+    if(durationMs < 0.0)
+        throw std::invalid_argument(
+            "Generator am duration must be non-negative");
+
     if(amplitude < 0.0 || amplitude > 1.0 || carrierHz < 0.0 ||
-       modulationHz < 0.0 || depth < 0.0 || depth > 1.0 || durationMs < 0.0)
+       modulationHz < 0.0 || depth < 0.0 || depth > 1.0)
     {
         throw std::invalid_argument("Generator am parameters are out of range");
     }
@@ -72,8 +80,12 @@ FmGenerator::FmGenerator(double amplitude, double carrierHz,
     : _amplitude(amplitude), _carrierHz(carrierHz), _modulationHz(modulationHz),
       _deviationHz(deviationHz), _durationMs(durationMs)
 {
+    if(durationMs < 0.0)
+        throw std::invalid_argument(
+            "Generator fm duration must be non-negative");
+
     if(amplitude < 0.0 || amplitude > 1.0 || carrierHz < 0.0 ||
-       modulationHz <= 0.0 || deviationHz < 0.0 || durationMs < 0.0)
+       modulationHz <= 0.0 || deviationHz < 0.0)
     {
         throw std::invalid_argument("Generator fm parameters are out of range");
     }
