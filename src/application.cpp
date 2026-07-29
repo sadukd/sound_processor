@@ -56,6 +56,10 @@ int Application::start(int argc, char* argv[])
         WavWriter writer;
         writer.write(std::string(*parser.getOutFileName()), sound);
     }
+    else
+    {
+        throw std::invalid_argument("No output file given.");
+    }
 
     return 0;
 }

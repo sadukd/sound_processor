@@ -61,3 +61,5 @@ if(BUILD_TESTING)
 
     catch_discover_tests(test_sound_processor)
 endif()
+
+add_dependencies(test_sound_processor sound_processor)

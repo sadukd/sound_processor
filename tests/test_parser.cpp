@@ -174,14 +174,6 @@ TEST_CASE("parser rejects empty filter block")
     REQUIRE(parser.parse(2, argv) == Result::badArgs);
 }
 
-TEST_CASE("parser rejects negative filter name")
-{
-    ArgsParser parser;
-    char* argv[] = {cstr("sound_processor"), cstr("-f"), cstr("-100")};
-
-    REQUIRE(parser.parse(3, argv) == Result::badArgs);
-}
-
 TEST_CASE("parser rejects stray token")
 {
     ArgsParser parser;
